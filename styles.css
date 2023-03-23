@@ -1,0 +1,22 @@
+html,
+body,
+#canvas {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.flow-node-incident {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ff3d3d;
+  color: White;
+  border-radius: 10px;
+  font-family: Arial;
+  font-size: 12px;
+  font-weight: bold;
+  transform: translateX(-50%);
+}

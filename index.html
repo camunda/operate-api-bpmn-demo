@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <!-- replace CDN url with local bpmn-js path -->
+  <script src="https://unpkg.com/bpmn-js/dist/bpmn-viewer.development.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+  <!-- BPMN diagram container -->
+  <div id="canvas"></div>
+  <script src="./api.js"></script>
+  <script>
+    // BpmnJS is the BPMN viewer instance
+    const viewer = new BpmnJS({ container: '#canvas' });
+
+    async function renderDiagram() {
+      const diagram = await fetchDiagram();
+
+      try {
+        await viewer.importXML(diagram);
+
+        const canvas = viewer.get('canvas');
+
+        canvas.zoom('fit-viewport');
+
+        const overlays = viewer.get('overlays');
+
+        fetchStatistics().then((statistics) => statistics.forEach(({ activityId, incidents }) => {
+          if (incidents > 0) {
+            overlays.add(activityId, 'flowNodeState', ({
+              position: {
+                bottom: 9,
+                right: 0
+              }, html: `<div class="flow-node-incident">${incidents}</div>`
+
+            }))
+          }
+        })).catch((err) => {
+          console.error('An error occured when fetching statistics: ', err)
+        })
+
+
+        fetchSequenceFlows().then((sequenceFlows) => {
+          sequenceFlows.forEach(sequenceFlow => {
+            const elementRegistry = viewer.get('elementRegistry');
+            const graphicsFactory = viewer.get('graphicsFactory');
+            const element = elementRegistry?.get(sequenceFlow);
+            if (element?.di !== undefined) {
+              element.di.set('stroke', '#4d90ff');
+
+              const gfx = elementRegistry?.getGraphics(element);
+              if (gfx !== undefined) {
+                graphicsFactory?.update('connection', element, gfx);
+              }
+            }
+          })
+        }).catch((err) => {
+          console.error('An error occured when fetching sequence flows: ', err)
+        })
+
+
+      } catch (err) {
+        console.log('err', err)
+      }
+    }
+
+    renderDiagram();
+  </script>
+</body>
+
+</html>
